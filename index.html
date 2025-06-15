@@ -929,47 +929,35 @@
 
         // --- Fungsi Autentikasi ---
         function checkPassword() {
-            const passwordInput = document.getElementById('passwordInput').value;
-            
-            // Autentikasi dengan Firebase
-            auth.signInWithEmailAndPassword(`${passwordInput}@tokounix.com`, passwordInput)
-                .then((userCredential) => {
-                    // Login berhasil
-                    userId = userCredential.user.uid;
-                    
-                    if (passwordInput === MASTER_PASSWORD) {
-                        currentUserRole = 'admin'; // Peran admin utama
-                    } else if (passwordInput === ADMIN_PASSWORD) {
-                        currentUserRole = 'cashier'; // Peran kasir (terbatas)
-                    } else {
-                        currentUserRole = 'cashier'; // Default ke kasir
-                    }
-                    
-                    document.getElementById('loginOverlay').style.display = 'none';
-                    document.body.style.overflow = 'auto'; // Re-enable scrolling
-                    initializeUIForRole(); // Panggil fungsi inisialisasi UI
-                    initializeApp(); 
-                })
-                .catch((error) => {
-                    // Jika login gagal, coba dengan sistem lokal
-                    if (passwordInput === MASTER_PASSWORD) {
-                        currentUserRole = 'admin'; // Peran admin utama
-                        document.getElementById('loginOverlay').style.display = 'none';
-                        document.body.style.overflow = 'auto'; // Re-enable scrolling
-                        initializeUIForRole(); // Panggil fungsi inisialisasi UI
-                        initializeApp(); 
-                    } else if (passwordInput === ADMIN_PASSWORD) {
-                        currentUserRole = 'cashier'; // Peran kasir (terbatas)
-                        document.getElementById('loginOverlay').style.display = 'none';
-                        document.body.style.overflow = 'auto'; // Re-enable scrolling
-                        initializeUIForRole(); // Panggil fungsi inisialisasi UI
-                        initializeApp(); 
-                    } else {
-                        alert('Kata sandi salah. Silakan coba lagi.');
-                        document.getElementById('passwordInput').value = '';
-                    }
-                });
-        }
+  const passwordInput = document.getElementById('passwordInput').value;
+  
+  // Mapping password pendek -> panjang
+  const passwordMap = {
+    'unix': 'unix12345', // Password sebenarnya di Firebase
+    'admin': 'admin67890'
+  };
+
+  const emailMap = {
+    'unix': 'unix@tokounix.com',
+    'admin': 'admin@tokounix.com'
+  };
+
+  if (!passwordMap[passwordInput]) {
+    alert("Password salah! Hanya 'unix' atau 'admin' yang diterima.");
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(
+    emailMap[passwordInput], 
+    passwordMap[passwordInput] // Gunakan password panjang
+  ).then((userCredential) => {
+    userId = userCredential.user.uid;
+    initializeApp();
+  }).catch((error) => {
+    console.error("Error:", error.message);
+    alert(`Login gagal: ${error.message}`);
+  });
+}
 
         // --- Fungsi Inisialisasi UI Berdasarkan Peran ---
         function initializeUIForRole() {
