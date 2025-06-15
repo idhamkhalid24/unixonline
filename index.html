@@ -1,1 +1,2063 @@
-untuk onlie
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKO UNIX</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <style>
+        :root {
+            /* Mode Terang */
+            --bg-body: #f4f7f6;
+            --color-text: #333;
+            --bg-sidebar: #2c3e50;
+            --color-sidebar-text: white;
+            --bg-sidebar-link: #34495e;
+            --bg-sidebar-link-hover: #4a6580;
+            --bg-sidebar-link-active: #007bff;
+            --bg-page: #fff;
+            --color-heading: #2c3e50;
+            --border-color: #eee;
+            --table-header-bg: #e9ecef;
+            --table-header-color: #555;
+            --table-row-even-bg: #f9f9f9;
+            --summary-bg: #eaf3f0;
+            --summary-border: #d4e0da;
+            --gross-income-color: #ffc107;
+            --profit-color: #28a745;
+            --expense-color: #dc3545;
+            --button-primary-bg: #28a745;
+            --button-primary-hover: #218838;
+            --button-secondary-bg: #6c757d;
+            --button-secondary-hover: #5a6268;
+            --button-info-bg: #007bff;
+            --button-info-hover: #0056b3;
+            --button-danger-bg: #dc3545;
+            --button-danger-hover: #c82333;
+            --button-copy-bg: #17a2b8;
+            --button-copy-hover: #138496;
+            --input-border: #ccc;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --sidebar-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Mode Gelap */
+        body.dark-mode {
+            --bg-body: #1a1a2e;
+            --color-text: #e0e0e0;
+            --bg-sidebar: #16213e;
+            --color-sidebar-text: #e0e0e0;
+            --bg-sidebar-link: #0f3460;
+            --bg-sidebar-link-hover: #1b4d8a;
+            --bg-sidebar-link-active: #007bff;
+            --bg-page: #202e4d;
+            --color-heading: #e0e0e0;
+            --border-color: #3d3d5c;
+            --table-header-bg: #2b3a5c;
+            --table-header-color: #e0e0e0;
+            --table-row-even-bg: #25314a;
+            --summary-bg: #2a3d60;
+            --summary-border: #3c527e;
+            --gross-income-color: #ffc107;
+            --profit-color: #4CAF50; /* Hijau lebih terang untuk gelap */
+            --expense-color: #FF6347; /* Merah lebih terang untuk gelap */
+            --button-primary-bg: #4CAF50;
+            --button-primary-hover: #45a049;
+            --button-secondary-bg: #5a6268;
+            --button-secondary-hover: #4e565c;
+            --button-info-bg: #3498db;
+            --button-info-hover: #217dbb;
+            --button-danger-bg: #e74c3c;
+            --button-danger-hover: #c0392b;
+            --button-copy-bg: #3498db;
+            --button-copy-hover: #217dbb;
+            --input-border: #555;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --sidebar-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--bg-body);
+            color: var(--color-text);
+            display: flex;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow: hidden; /* Prevent scroll on main body when login is active */
+        }
+
+        /* Login Overlay Styles */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background-color: var(--bg-page);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-box h2 {
+            margin-bottom: 25px;
+            color: var(--color-heading);
+            font-size: 2em;
+        }
+
+        .login-box input {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: var(--bg-page);
+            color: var(--color-text);
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .login-box button {
+            background-color: var(--button-info-bg);
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 17px;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            font-weight: 600;
+        }
+
+        .login-box button:hover {
+            background-color: var(--button-info-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar {
+            width: 240px; /* Lebar sidebar sedikit lebih besar */
+            background-color: var(--bg-sidebar);
+            color: var(--color-sidebar-text);
+            padding: 20px;
+            box-shadow: var(--sidebar-shadow);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--color-sidebar-text);
+            font-size: 1.8em;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .sidebar nav ul {
+            list-style: none;
+            padding: 0;
+            flex-grow: 1; /* Agar daftar menu mengisi ruang */
+        }
+        .sidebar nav ul li {
+            margin-bottom: 12px; /* Jarak antar menu */
+        }
+        .sidebar nav ul li a {
+            display: flex; /* Untuk ikon jika nanti ada */
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px; /* Padding lebih besar */
+            background-color: var(--bg-sidebar-link);
+            color: var(--color-sidebar-text);
+            text-decoration: none;
+            border-radius: 8px; /* Sudut lebih membulat */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            font-size: 1.05em;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-image: linear-gradient(to right, var(--bg-sidebar-link), darken(var(--bg-sidebar-link), 5%)); /* Gradien */
+        }
+        .sidebar nav ul li a:hover {
+            background-color: var(--bg-sidebar-link-hover);
+            transform: translateX(5px) scale(1.02); /* Sedikit membesar */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background-image: linear-gradient(to right, var(--bg-sidebar-link-hover), darken(var(--bg-sidebar-link-hover), 5%));
+        }
+        .sidebar nav ul li a.active {
+            background-color: var(--bg-sidebar-link-active);
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); /* Shadow khusus untuk aktif */
+            transform: scale(1.01);
+            background-image: linear-gradient(to right, var(--bg-sidebar-link-active), darken(var(--bg-sidebar-link-active), 5%));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        /* Mengatur display none secara tegas */
+        .hidden-menu {
+            display: none !important;
+        }
+
+        /* Gaya baru untuk ringkasan harian di sidebar */
+        .daily-summary-section {
+            margin-top: auto; /* Dorong ke bawah */
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            margin-top: 30px;
+        }
+        .daily-summary-section h3 {
+            color: var(--color-sidebar-text);
+            margin-bottom: 15px;
+            font-size: 1.15em;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .daily-summary-section p {
+            color: var(--color-sidebar-text);
+            font-size: 0.95em;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08); /* Garis putus-putus */
+        }
+        .daily-summary-section p:last-child {
+            border-bottom: none;
+        }
+        .daily-summary-section p strong {
+            font-size: 1em;
+            margin-left: 10px;
+            text-align: right;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+        .daily-summary-section p.gross-income strong {
+            color: var(--gross-income-color); 
+        }
+        .daily-summary-section p.profit strong {
+            color: var(--profit-color); 
+        }
+        .daily-summary-section p.expense strong {
+            color: var(--expense-color); 
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .page {
+            display: none;
+            background-color: var(--bg-page);
+            padding: 30px;
+            border-radius: 12px; /* Lebih membulat */
+            box-shadow: var(--box-shadow);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        h1, h2 {
+            color: var(--color-heading);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .form-group {
+            margin-bottom: 18px; /* Jarak antar grup form */
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px; /* Jarak label ke input */
+            font-weight: 600; /* Sedikit lebih tebal */
+            color: var(--color-text);
+            font-size: 0.95em;
+        }
+        .form-group input[type="date"],
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group textarea {
+            width: calc(100% - 22px);
+            padding: 12px; /* Padding lebih besar */
+            border: 1px solid var(--input-border);
+            border-radius: 8px; /* Sudut lebih membulat */
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: var(--bg-page); /* Input mengikuti warna halaman */
+            color: var(--color-text);
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--button-info-bg); /* Highlight saat fokus */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        .form-group input[type="number"] {
+            text-transform: none;
+        }
+        .form-group button {
+            background-color: var(--button-primary-bg);
+            color: white;
+            padding: 14px 25px; /* Padding lebih besar */
+            border: none;
+            border-radius: 8px; /* Sudut lebih membulat */
+            cursor: pointer;
+            font-size: 17px;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+        .form-group button:hover {
+            background-color: var(--button-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 35px 0;
+            transition: border-color 0.3s ease;
+        }
+
+        .results, .transactions-list {
+            margin-top: 30px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+            transition: border-color 0.3s ease;
+        }
+        .results p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .results p strong {
+            color: var(--button-info-bg);
+        }
+        .transactions-list table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden; /* Penting untuk border-radius tabel */
+        }
+        .transactions-list th, .transactions-list td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+            transition: border-color 0.3s ease;
+        }
+        .transactions-list th {
+            background-color: var(--table-header-bg);
+            font-weight: bold;
+            color: var(--table-header-color);
+            text-transform: uppercase;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .transactions-list tr:nth-child(even) {
+            background-color: var(--table-row-even-bg);
+            transition: background-color 0.3s ease;
+        }
+        .transactions-list tr:hover {
+            background-color: rgba(0, 123, 255, 0.05); /* Highlight baris saat hover */
+        }
+
+        .search-controls, .price-search-controls {
+            display: flex;
+            gap: 15px; /* Jarak lebih besar */
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: flex-start; /* Rata kiri */
+            padding-bottom: 10px; /* Padding di bawah search controls */
+        }
+        .search-controls input, .price-search-controls input {
+            flex-grow: 1;
+            min-width: 150px;
+            max-width: 250px; /* Batasi lebar input */
+        }
+        .search-controls button, .price-search-controls button {
+            width: auto;
+            flex-grow: 0; /* Jangan biarkan tombol terlalu besar */
+            padding: 10px 18px;
+            font-size: 0.95em;
+            margin-top: 0; /* Reset margin */
+            border-radius: 6px;
+        }
+        .search-controls button:first-of-type {
+            background-color: var(--button-info-bg);
+        }
+        .search-controls button:first-of-type:hover {
+            background-color: var(--button-info-hover);
+        }
+        .search-controls button:last-of-type {
+            background-color: var(--button-secondary-bg);
+        }
+        .search-controls button:last-of-type:hover {
+            background-color: var(--button-secondary-hover);
+        }
+
+        .delete-btn {
+            background-color: var(--button-danger-bg);
+            color: white;
+            border: none;
+            padding: 8px 12px; /* Padding sedikit lebih besar */
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin: 3px;
+        }
+        .delete-btn:hover {
+            background-color: var(--button-danger-hover);
+            transform: translateY(-1px);
+        }
+        .copy-btn {
+            background-color: var(--button-copy-bg);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin: 3px;
+        }
+        .copy-btn:hover {
+            background-color: var(--button-copy-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Styles for Harga Jual Page */
+        .price-calc-input {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Jarak antar label dan input */
+        }
+        .price-calc-input label {
+            flex: 1;
+            margin-right: 0; /* Reset margin */
+            text-align: right; /* Rata kanan label */
+        }
+        .price-calc-input input {
+            flex: 2;
+        }
+        #sellingPriceResult {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--profit-color);
+            text-align: center;
+            margin-top: 25px;
+            padding: 10px;
+            background-color: var(--summary-bg);
+            border-radius: 8px;
+            border: 1px solid var(--summary-border);
+        }
+        
+        /* Warna untuk keuntungan bersih */
+        .profit-green {
+            color: var(--profit-color);
+            font-weight: bold;
+        }
+        .profit-red {
+            color: var(--expense-color);
+            font-weight: bold;
+        }
+        .price-search-controls {
+            justify-content: flex-end; /* Rata kanan tombol cari */
+        }
+
+
+        .profit-summary-section, .expense-summary-section, .financial-summary-section, .gross-income-summary-section { 
+            margin-top: 25px;
+            padding: 20px; /* Padding lebih besar */
+            background-color: var(--summary-bg);
+            border-radius: 10px;
+            border: 1px solid var(--summary-border);
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .profit-summary-section h3, .expense-summary-section h3, .financial-summary-section h3, .gross-income-summary-section h3 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            color: var(--color-heading);
+        }
+
+        .profit-summary-section p, .expense-summary-section p, .financial-summary-section p, .gross-income-summary-section p { 
+            margin: 10px 0;
+            font-size: 1.1em;
+            color: var(--color-text);
+        }
+
+        .profit-summary-section p strong {
+            color: var(--profit-color); 
+            font-size: 1.25em;
+        }
+        .expense-summary-section p strong {
+            color: var(--expense-color); 
+            font-size: 1.25em;
+        }
+        .financial-summary-section p strong { 
+            color: var(--button-info-bg); 
+            font-size: 1.4em;
+        }
+        .gross-income-summary-section p strong { 
+            color: var(--gross-income-color); 
+            font-size: 1.25em;
+        }
+
+        /* Gaya untuk grafik */
+        .chart-container {
+            margin-top: 30px;
+            padding: 25px; /* Padding lebih besar */
+            background-color: var(--bg-page);
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            position: relative;
+            height: 450px; /* Tinggi default untuk grafik */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .chart-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Tombol Mode Terang/Gelap & Shortcut */
+        .theme-toggle-button, .shortcut-button {
+            background: none;
+            border: none;
+            color: var(--color-sidebar-text);
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+            text-align: center;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .theme-toggle-button:hover, .shortcut-button:hover {
+            color: var(--button-info-bg);
+        }
+        /* Ikon sederhana untuk mode terang/gelap */
+        .theme-toggle-button::before {
+            content: '☀️'; /* Simbol matahari untuk terang */
+            font-size: 1.2em;
+        }
+        body.dark-mode .theme-toggle-button::before {
+            content: '🌙'; /* Simbol bulan untuk gelap */
+        }
+        .shortcut-button {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: none; /* Only the first one has a border-top */
+        }
+        .shortcut-button:first-of-type {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            .sidebar h2 {
+                margin-bottom: 15px;
+            }
+            .sidebar nav ul {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            .sidebar nav ul li {
+                margin-bottom: 0;
+            }
+            .sidebar nav ul li a {
+                padding: 10px 12px;
+                font-size: 0.9em;
+            }
+            .daily-summary-section {
+                text-align: left; 
+                margin-top: 15px;
+                padding: 10px;
+            }
+            .daily-summary-section p {
+                font-size: 0.8em;
+                margin-bottom: 5px;
+            }
+            .daily-summary-section p strong {
+                font-size: 0.9em;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+            .page {
+                padding: 20px;
+            }
+            .search-controls, .price-search-controls {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch; /* Agar item mengisi lebar */
+            }
+            .search-controls input, .price-search-controls input {
+                max-width: 100%;
+                min-width: unset;
+            }
+            .search-controls button, .price-search-controls button {
+                width: 100%;
+            }
+            .price-calc-input {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .price-calc-input label {
+                margin-bottom: 5px;
+                text-align: left;
+            }
+            .chart-container {
+                height: 300px;
+                padding: 15px;
+            }
+            .form-group button {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            .theme-toggle-button, .shortcut-button {
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h2>Selamat Datang di TOKO UNIX</h2>
+            <input type="password" id="passwordInput" placeholder="Masukkan Kata Sandi">
+            <button onclick="checkPassword()">Masuk</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h2>TOKO UNIX</h2>
+        <nav>
+            <ul id="mainMenu">
+                <li id="menuPendapatan"><a href="#pendapatan" class="nav-link active" data-page="pendapatan">1. Pendapatan</a></li>
+                <li id="menuHargaJual" class="hidden-menu-admin"><a href="#harga-jual" class="nav-link" data-page="harga-jual">2. Tentukan Harga Jual</a></li>
+                <li id="menuPengeluaran"><a href="#pengeluaran" class="nav-link" data-page="pengeluaran">3. Pengeluaran</a></li>
+                <li id="menuLaporanKeuangan" class="hidden-menu-admin"><a href="#ringkasan-keuangan" class="nav-link" data-page="ringkasan-keuangan">4. Laporan Keuangan</a></li>
+            </ul>
+        </nav>
+
+        <div class="daily-summary-section sidebar-admin-feature">
+            <h3>Ringkasan Harian Cepat</h3>
+            <p>5. Pendapatan Kotor Hari Ini: <strong id="sidebarPendapatanKotorHariIni" class="gross-income">Rp 0</strong></p>
+            <p>6. Laba Dihitung Hari Ini: <strong id="sidebarLabaHariIni" class="profit">Rp 0</strong></p>
+            <p>7. Pengeluaran Hari Ini: <strong id="sidebarPengeluaranHariIni" class="expense">Rp 0</strong></p>
+        </div>
+
+        <button class="theme-toggle-button sidebar-admin-feature" onclick="toggleTheme()">
+            <span>Mode Terang/Gelap</span>
+        </button>
+        <button class="shortcut-button sidebar-admin-feature" onclick="window.open('http://youtube.com', '_blank')">
+            <span>YouTube</span>
+        </button>
+        <button class="shortcut-button sidebar-admin-feature" onclick="window.open('http://spotify.com', '_blank')">
+            <span>Spotify</span>
+        </button>
+    </div>
+
+    <div class="main-content">
+        <div id="pendapatan" class="page active">
+            <h2>Catat Pendapatan & Hitung Laba</h2>
+            <div class="form-group">
+                <label for="pendapatanDate">Tanggal:</label>
+                <input type="date" id="pendapatanDate">
+            </div>
+            <div class="form-group">
+                <label for="namaBarangPendapatan">Nama Barang (Opsional):</label>
+                <input type="text" id="namaBarangPendapatan" placeholder="Contoh: Kemeja Batik">
+            </div>
+            <div class="form-group">
+                <label for="nominalPendapatan">Nominal Pendapatan (Rp):</label>
+                <input type="number" id="nominalPendapatan" placeholder="Contoh: 100" min="0">
+            </div>
+            <div class="form-group">
+                <label for="profitPercentageLaba">Persentase Laba (%):</label>
+                <input type="number" id="profitPercentageLaba" value="20" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <button onclick="calculateProfitAndAddTransaction()">Tambahkan Pendapatan</button>
+            </div>
+
+            <hr>
+            <div class="gross-income-summary-section hidden-menu-admin">
+                <h3>Rincian Pendapatan Kotor</h3>
+                <p>Pendapatan Kotor Hari Ini: <strong id="pendapatanKotorHariIni">Rp 0</strong></p>
+                <p>Pendapatan Kotor Bulan Ini: <strong id="pendapatanKotorBulanIni">Rp 0</strong></p>
+                <p>Total Pendapatan Kotor Keseluruhan: <strong id="totalPendapatanKotorKeseluruhan">Rp 0</strong></p>
+            </div>
+
+            <div class="profit-summary-section hidden-menu-admin">
+                <h3>Rincian Laba Dihitung</h3>
+                <p>Laba Hari Ini: <strong id="labaHariIni">Rp 0</strong></p>
+                <p>Laba Bulan Ini: <strong id="labaBulanIni">Rp 0</strong></p>
+                <p>Total Laba Keseluruhan: <strong id="totalLabaKeseluruhan">Rp 0</strong></p>
+            </div>
+
+            <div class="transactions-list">
+                <h3>Daftar Pendapatan & Laba</h3>
+                <div class="search-controls">
+                    <input type="date" id="searchPendapatanStartDate" placeholder="Dari Tanggal">
+                    <input type="date" id="searchPendapatanEndDate" placeholder="Sampai Tanggal">
+                    <button onclick="searchTransactionsByType('omzet')">Cari</button>
+                    <button onclick="displayTransactionsByType('omzet')" style="background-color: var(--button-secondary-bg);">Tampilkan Semua</button>
+                </div>
+                <table id="pendapatanTable">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Nama Barang</th>
+                            <th>Nominal Pendapatan (Rp)</th>
+                            <th>Persentase Laba (%)</th>
+                            <th>Laba Dihitung (Rp)</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="harga-jual" class="page">
+            <h2>Tentukan Harga Jual Barang</h2>
+            <div class="form-group">
+                <label for="productName">Nama Barang (Opsional):</label>
+                <input type="text" id="productName" placeholder="Contoh: Kemeja Batik">
+            </div>
+            <div class="form-group">
+                <label for="productCode">Kode Barang (Opsional):</label>
+                <input type="text" id="productCode" placeholder="Contoh: KB001">
+            </div>
+            <div class="form-group price-calc-input">
+                <label for="costPriceProduct">Modal (Rp):</label>
+                <input type="number" id="costPriceProduct" placeholder="Contoh: 100" min="0" required>
+            </div>
+            <div class="form-group price-calc-input">
+                <label for="profitPercentage">Persentase Keuntungan (%):</label>
+                <input type="number" id="profitPercentage" value="20" min="0" max="100">
+            </div>
+            <div class="form-group price-calc-input">
+                <label for="taxPercentage">Pajak (%):</label>
+                <input type="number" id="taxPercentage" value="0" min="0" max="100">
+            </div>
+            <div class="form-group price-calc-input">
+                <label for="discountPercentage">Diskon (%):</label>
+                <input type="number" id="discountPercentage" value="0" min="0" max="100">
+            </div>
+            <div class="form-group">
+                <button onclick="addSellingPriceCalculation()">Hitung Harga Jual</button>
+            </div>
+            
+            <hr>
+
+            <div class="transactions-list">
+                <h3>Riwayat Perhitungan Harga Jual</h3>
+                <div class="price-search-controls">
+                    <input type="text" id="searchPriceTerm" placeholder="Cari Nama/Kode Barang">
+                    <button onclick="searchSellingPriceHistory()">Cari</button>
+                    <button onclick="displaySellingPriceHistory()" style="background-color: var(--button-secondary-bg);">Tampilkan Semua</button>
+                </div>
+                <table id="sellingPriceTable">
+                    <thead>
+                        <tr>
+                            <th>Nama Barang</th>
+                            <th>Kode Barang</th>
+                            <th>Modal</th>
+                            <th>Keuntungan Bersih (Rp)</th>
+                            <th>Pajak (%)</th>
+                            <th>Diskon (%)</th>
+                            <th>Harga Jual</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="pengeluaran" class="page">
+            <h2>Catat Pengeluaran</h2>
+            <div class="form-group">
+                <label for="pengeluaranDate">Tanggal:</label>
+                <input type="date" id="pengeluaranDate">
+            </div>
+            <div class="form-group">
+                <label for="pengeluaranDescription">Deskripsi Pengeluaran:</label>
+                <input type="text" id="pengeluaranDescription" placeholder="Contoh: Pembelian bahan baku, Gaji karyawan">
+            </div>
+             <div class="form-group">
+                <label for="pengeluaranAmount">Jumlah Pengeluaran (Rp):</label>
+                <input type="number" id="pengeluaranAmount" placeholder="Contoh: 50" min="0">
+            </div>
+            <div class="form-group">
+                <button onclick="addTransaction('pengeluaran')">Tambahkan Pengeluaran</button>
+            </div>
+
+            <hr>
+            <div class="expense-summary-section hidden-menu-admin">
+                <h3>Rincian Pengeluaran</h3>
+                <p>Pengeluaran Hari Ini: <strong id="pengeluaranHariIni">Rp 0</strong></p>
+                <p>Pengeluaran Bulan Ini: <strong id="pengeluaranBulanIni">Rp 0</strong></p>
+                <p>Total Pengeluaran Keseluruhan: <strong id="totalPengeluaranKeseluruhan">Rp 0</strong></p>
+            </div>
+
+            <div class="transactions-list">
+                <h3>Daftar Pengeluaran</h3>
+                <div class="search-controls">
+                    <input type="date" id="searchPengeluaranStartDate" placeholder="Dari Tanggal">
+                    <input type="date" id="searchPengeluaranEndDate" placeholder="Sampai Tanggal">
+                    <button onclick="searchTransactionsByType('pengeluaran')">Cari</button>
+                    <button onclick="displayTransactionsByType('pengeluaran')" style="background-color: var(--button-secondary-bg);">Tampilkan Semua</button>
+                </div>
+                <table id="pengeluaranTable">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Deskripsi</th>
+                            <th>Jumlah (Rp)</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="ringkasan-keuangan" class="page">
+            <h2>Laporan Keuangan Keseluruhan</h2>
+            <div class="search-controls" style="margin-bottom: 20px;">
+                <label for="summaryStartDate">Dari Tanggal:</label>
+                <input type="date" id="summaryStartDate">
+                <label for="summaryEndDate">Sampai Tanggal:</label>
+                <input type="date" id="summaryEndDate">
+                <button onclick="calculateFinancials(true)" style="background-color: var(--button-info-bg);">Cari Laporan</button>
+                <button onclick="calculateFinancials(false)" style="background-color: var(--button-secondary-bg);">Tampilkan Semua</button>
+            </div>
+            
+            <div class="financial-summary-section">
+                <p>Total Laba Dihitung: <strong id="totalOmzetSummary">Rp 0</strong></p>
+                <p>Total Pengeluaran: <strong id="totalPengeluaranSummary">Rp 0</strong></p>
+                <p>Laba Bersih: <strong id="netProfitSummary">Rp 0</strong></p>
+            </div>
+            
+            <hr>
+            <div class="chart-container">
+                <canvas id="monthlyFinancialChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDvSlI0vH74baKXWosBPD8BubO6ofUOj4E",
+            authDomain: "toko-unix-data.firebaseapp.com",
+            databaseURL: "https://toko-unix-data-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "toko-unix-data",
+            storageBucket: "toko-unix-data.firebasestorage.app",
+            messagingSenderId: "585416065681",
+            appId: "1:585416065681:web:d878da620bb3678b9ef530",
+            measurementId: "G-S7H039H4MK"
+        };
+
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        const MASTER_PASSWORD = "unix"; // Kata sandi utama untuk Admin (akses penuh)
+        const ADMIN_PASSWORD = "admin"; // Kata sandi untuk Kasir (akses terbatas)
+
+        let transactions = []; 
+        let sellingPriceHistory = []; 
+        let monthlyChart; 
+        let currentUserRole = null; // Menyimpan peran pengguna yang login
+        let userId = null; // Untuk menyimpan ID user yang login
+
+        // --- Fungsi Autentikasi ---
+        function checkPassword() {
+            const passwordInput = document.getElementById('passwordInput').value;
+            
+            // Autentikasi dengan Firebase
+            auth.signInWithEmailAndPassword(`${passwordInput}@tokounix.com`, passwordInput)
+                .then((userCredential) => {
+                    // Login berhasil
+                    userId = userCredential.user.uid;
+                    
+                    if (passwordInput === MASTER_PASSWORD) {
+                        currentUserRole = 'admin'; // Peran admin utama
+                    } else if (passwordInput === ADMIN_PASSWORD) {
+                        currentUserRole = 'cashier'; // Peran kasir (terbatas)
+                    } else {
+                        currentUserRole = 'cashier'; // Default ke kasir
+                    }
+                    
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.body.style.overflow = 'auto'; // Re-enable scrolling
+                    initializeUIForRole(); // Panggil fungsi inisialisasi UI
+                    initializeApp(); 
+                })
+                .catch((error) => {
+                    // Jika login gagal, coba dengan sistem lokal
+                    if (passwordInput === MASTER_PASSWORD) {
+                        currentUserRole = 'admin'; // Peran admin utama
+                        document.getElementById('loginOverlay').style.display = 'none';
+                        document.body.style.overflow = 'auto'; // Re-enable scrolling
+                        initializeUIForRole(); // Panggil fungsi inisialisasi UI
+                        initializeApp(); 
+                    } else if (passwordInput === ADMIN_PASSWORD) {
+                        currentUserRole = 'cashier'; // Peran kasir (terbatas)
+                        document.getElementById('loginOverlay').style.display = 'none';
+                        document.body.style.overflow = 'auto'; // Re-enable scrolling
+                        initializeUIForRole(); // Panggil fungsi inisialisasi UI
+                        initializeApp(); 
+                    } else {
+                        alert('Kata sandi salah. Silakan coba lagi.');
+                        document.getElementById('passwordInput').value = '';
+                    }
+                });
+        }
+
+        // --- Fungsi Inisialisasi UI Berdasarkan Peran ---
+        function initializeUIForRole() {
+            // Sembunyikan semua menu admin dan fitur admin secara default
+            // 'hidden-menu-admin' untuk elemen yang hanya terlihat oleh admin
+            document.querySelectorAll('.hidden-menu-admin').forEach(el => {
+                el.style.display = 'none !important'; // Pastikan disembunyikan
+            });
+            // 'sidebar-admin-feature' untuk elemen ringkasan harian dan tombol di sidebar
+            document.querySelectorAll('.sidebar-admin-feature').forEach(el => {
+                el.style.display = 'none !important'; // Pastikan disembunyikan
+            });
+           
+            if (currentUserRole === 'admin') {
+                // Tampilkan semua menu dan elemen untuk admin
+                document.querySelectorAll('.hidden-menu-admin').forEach(el => {
+                    el.style.display = ''; // Reset display ke nilai default
+                });
+                document.querySelectorAll('.sidebar-admin-feature').forEach(el => {
+                    el.style.display = ''; // Reset display ke nilai default
+                });
+                showPage('pendapatan'); // Default page for admin
+            } else if (currentUserRole === 'cashier') {
+                // Untuk kasir, hanya Pendapatan dan Pengeluaran yang terlihat
+                // Elemen dengan kelas 'hidden-menu-admin' dan 'sidebar-admin-feature' akan tetap tersembunyi
+                showPage('pendapatan'); // Default page for cashier
+            }
+        }
+
+        // --- Fungsi Utilitas Umum ---
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0, 
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function getTodayDateString() {
+            return new Date().toISOString().slice(0, 10);
+        }
+
+        function copyToClipboard(text, label) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text.toString())
+                    .then(() => {
+                        alert(`${label || 'Teks'} "${text}" berhasil disalin!`);
+                    })
+                    .catch(err => {
+                        console.error('Gagal menyalin:', err);
+                        alert(`Gagal menyalin ${label || 'teks'}. Silakan salin manual.`);
+                    });
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = text.toString();
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    alert(`${label || 'Teks'} "${text}" berhasil disalin!`);
+                } catch (err) {
+                    console.error('Gagal menyalin (fallback):', err);
+                    alert(`Gagal menyalin ${label || 'teks'}. Browser Anda tidak mendukung copy otomatis.`);
+                }
+                document.body.removeChild(textarea);
+            }
+        }
+
+        function roundToThousands(amount) {
+            return Math.round(amount / 1000) * 1000;
+        }
+
+        // --- Fungsi Mode Terang/Gelap ---
+        function toggleTheme() {
+            if (currentUserRole !== 'admin') return; // Hanya admin yang bisa akses ini
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            if (document.getElementById('ringkasan-keuangan').classList.contains('active')) {
+                renderMonthlyChart(); 
+            }
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+
+        // --- Navigasi Halaman ---
+        function showPage(pageId) {
+            // Sembunyikan semua halaman terlebih dahulu
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            // Hapus kelas 'active' dari semua link navigasi
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Tampilkan halaman yang diminta dan tandai link navigasinya sebagai aktif
+            document.getElementById(pageId).classList.add('active');
+            document.querySelector(`.nav-link[data-page="${pageId}"]`).classList.add('active');
+
+            // Logika untuk inisialisasi data atau tampilan spesifik setiap halaman
+            updateSidebarDailySummary(); 
+
+            if (pageId === 'pendapatan') { 
+                document.getElementById('pendapatanDate').value = getTodayDateString();
+                document.getElementById('profitPercentageLaba').value = '20'; 
+                if (currentUserRole === 'admin') { 
+                    updateLabaSummary(); 
+                    updatePendapatanKotorSummary(); 
+                }
+                displayTransactionsByType('omzet'); 
+            } else if (pageId === 'pengeluaran') {
+                document.getElementById('pengeluaranDate').value = getTodayDateString();
+                if (currentUserRole === 'admin') { 
+                    updatePengeluaranSummary(); 
+                }
+                displayTransactionsByType('pengeluaran');
+            } else if (pageId === 'ringkasan-keuangan') { 
+                if (currentUserRole === 'admin') {
+                    document.getElementById('summaryStartDate').value = ''; 
+                    document.getElementById('summaryEndDate').value = '';   
+                    calculateFinancials(); 
+                    renderMonthlyChart(); 
+                } else {
+                    alert('Anda tidak memiliki akses ke laporan keuangan.');
+                    showPage('pendapatan'); // Redirect ke pendapatan jika tidak ada akses
+                }
+            } else if (pageId === 'harga-jual') { 
+                if (currentUserRole === 'admin') {
+                    displaySellingPriceHistory();
+                } else {
+                    alert('Anda tidak memiliki akses untuk menentukan harga jual.');
+                    showPage('pendapatan'); // Redirect ke pendapatan jika tidak ada akses
+                }
+            }
+        }
+
+        // --- Fungsi Transaksi (Laba & Pengeluaran) ---
+
+        function calculateProfitAndAddTransaction() {
+            const dateInput = document.getElementById('pendapatanDate').value;
+            const namaBarangInput = document.getElementById('namaBarangPendapatan').value.trim();
+            const nominalPendapatanInput = document.getElementById('nominalPendapatan').value;
+            const profitPercentageLabaInput = document.getElementById('profitPercentageLaba').value;
+
+            if (!dateInput || !nominalPendapatanInput || !profitPercentageLabaInput) {
+                alert('Tanggal, Nominal Pendapatan, dan Persentase Laba harus diisi!');
+                return;
+            }
+
+            let nominalPendapatan = parseFloat(nominalPendapatanInput);
+            if (isNaN(nominalPendapatan) || nominalPendapatan < 0) {
+                alert('Nominal Pendapatan harus angka positif!');
+                return;
+            }
+            
+            // Auto-multiply by 1000 jika input kurang dari 1000 dan tanpa desimal, dan panjangnya <= 3 digit
+            if (nominalPendapatanInput.indexOf('.') === -1 && nominalPendapatan < 1000 && nominalPendapatanInput.length <= 3) { 
+                nominalPendapatan *= 1000;
+            }
+
+            let profitPercentageLaba = parseFloat(profitPercentageLabaInput);
+            if (isNaN(profitPercentageLaba) || profitPercentageLaba < 0 || profitPercentageLaba > 100) {
+                alert('Persentase Laba harus antara 0-100!');
+                return;
+            }
+
+            const calculatedLaba = (nominalPendapatan * (profitPercentageLaba / 100));
+            const roundedLaba = roundToThousands(calculatedLaba); 
+
+            const newTransaction = {
+                date: new Date(dateInput),
+                type: 'omzet', 
+                productName: namaBarangInput || '-',
+                description: `Laba dari ${namaBarangInput ? namaBarangInput + ' ' : ''}${formatCurrency(nominalPendapatan)} (${profitPercentageLaba}%)`, 
+                amount: roundedLaba, 
+                originalNominal: nominalPendapatan, 
+                profitPercentage: profitPercentageLaba 
+            };
+
+            transactions.push(newTransaction);
+            saveTransactions();
+            
+            document.getElementById('namaBarangPendapatan').value = '';
+            document.getElementById('nominalPendapatan').value = '';
+            document.getElementById('pendapatanDate').value = getTodayDateString(); 
+
+            displayTransactionsByType('omzet'); 
+            if (currentUserRole === 'admin') { 
+                updateLabaSummary(); 
+                updatePendapatanKotorSummary(); 
+                calculateFinancials(); 
+                renderMonthlyChart(); 
+            }
+            updateSidebarDailySummary(); 
+            alert('Pendapatan berhasil ditambahkan!');
+        }
+
+        function addTransaction(type) { 
+            let dateInput, descriptionInput, amountInput;
+            let descriptionElement, amountElement, dateElement;
+
+            if (type === 'pengeluaran') {
+                dateElement = document.getElementById('pengeluaranDate');
+                descriptionElement = document.getElementById('pengeluaranDescription');
+                amountElement = document.getElementById('pengeluaranAmount');
+            }
+
+            dateInput = dateElement.value;
+            descriptionInput = descriptionElement.value.trim();
+            amountInput = amountElement.value;
+
+            if (!dateInput || !descriptionInput || !amountInput) {
+                alert('Semua kolom harus diisi!');
+                return;
+            }
+
+            let amount = parseFloat(amountInput);
+            if (isNaN(amount) || amount < 0) {
+                alert('Jumlah harus angka positif!');
+                return;
+            }
+            
+            // Auto-multiply by 1000 jika input kurang dari 1000 dan tanpa desimal, dan panjangnya <= 3 digit
+            if (amountInput.indexOf('.') === -1 && amount < 1000 && amountInput.length <= 3) { 
+                amount *= 1000;
+            }
+
+            const newTransaction = {
+                date: new Date(dateInput),
+                type: type,
+                description: descriptionInput,
+                amount: amount
+            };
+
+            transactions.push(newTransaction);
+            saveTransactions();
+            
+            descriptionElement.value = '';
+            amountElement.value = '';
+            dateElement.value = getTodayDateString(); 
+
+            displayTransactionsByType('pengeluaran');
+            if (currentUserRole === 'admin') { 
+                updatePengeluaranSummary(); 
+                calculateFinancials(); 
+                renderMonthlyChart(); 
+            }
+            updateSidebarDailySummary(); 
+            alert(`Pengeluaran berhasil ditambahkan!`);
+        }
+
+        function saveTransactions() {
+            // Simpan ke localStorage
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            
+            // Simpan ke Firebase jika user sudah login
+            if (userId) {
+                database.ref(`users/${userId}/transactions`).set(transactions)
+                    .catch(error => {
+                        console.error('Gagal menyimpan transaksi ke Firebase:', error);
+                    });
+            }
+        }
+
+        function deleteTransaction(transactionType, displayIndex, currentList) {
+            const enteredPassword = prompt('Masukkan kata sandi untuk menghapus:');
+            if (enteredPassword !== MASTER_PASSWORD) { 
+                alert('Kata sandi salah. Penghapusan dibatalkan.');
+                return;
+            }
+
+            const transactionToDelete = currentList[displayIndex];
+            
+            // Mencari indeks transaksi asli di array `transactions`
+            const originalIndex = transactions.findIndex(t => 
+                t.date.getTime() === transactionToDelete.date.getTime() &&
+                t.type === transactionToDelete.type &&
+                t.description === transactionToDelete.description &&
+                t.amount === transactionToDelete.amount &&
+                (t.originalNominal === transactionToDelete.originalNominal || t.originalNominal === undefined) && 
+                (t.profitPercentage === transactionToDelete.profitPercentage || t.profitPercentage === undefined) 
+            );
+
+            if (originalIndex > -1) {
+                transactions.splice(originalIndex, 1);
+                saveTransactions();
+                
+                // Refresh tampilan dan ringkasan yang relevan
+                if (transactionType === 'omzet') {
+                    displayTransactionsByType('omzet');
+                    if (currentUserRole === 'admin') {
+                        updateLabaSummary(); 
+                        updatePendapatanKotorSummary(); 
+                    }
+                } else if (transactionType === 'pengeluaran') {
+                    displayTransactionsByType('pengeluaran');
+                    if (currentUserRole === 'admin') {
+                        updatePengeluaranSummary(); 
+                    }
+                } 
+                if (currentUserRole === 'admin') {
+                    calculateFinancials(); 
+                    renderMonthlyChart(); 
+                }
+                updateSidebarDailySummary(); 
+                alert('Data berhasil dihapus!');
+            } else {
+                alert('Gagal menghapus data. Transaksi tidak ditemukan.');
+            }
+        }
+
+        function displayTransactionsByType(type, filteredTransactions = null) {
+            let tableBody;
+            let displayList;
+
+            if (type === 'omzet') { 
+                tableBody = document.querySelector('#pendapatanTable tbody');
+                displayList = filteredTransactions || transactions.filter(t => t.type === 'omzet');
+            } else if (type === 'pengeluaran') {
+                tableBody = document.querySelector('#pengeluaranTable tbody');
+                displayList = filteredTransactions || transactions.filter(t => t.type === 'pengeluaran');
+            } 
+            
+            tableBody.innerHTML = ''; 
+
+            const sortedTransactions = [...displayList].sort((a, b) => b.date - a.date);
+
+            if (sortedTransactions.length === 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell(0);
+                if (type === 'omzet') cell.colSpan = 6; 
+                else if (type === 'pengeluaran') cell.colSpan = 4;
+                
+                cell.textContent = `Tidak ada ${type === 'omzet' ? 'data pendapatan' : 'data pengeluaran'} ditemukan.`;
+                cell.style.textAlign = "center";
+                return;
+            }
+
+            sortedTransactions.forEach((t, index) => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = t.date.toISOString().slice(0, 10);
+                
+                if (t.type === 'omzet') { 
+                    row.insertCell(1).textContent = t.productName || '-';
+                    row.insertCell(2).textContent = formatCurrency(t.originalNominal || t.amount); 
+                    row.insertCell(3).textContent = `${t.profitPercentage || 0}%`; 
+                    row.insertCell(4).textContent = formatCurrency(t.amount); 
+                } else if (t.type === 'pengeluaran') {
+                    row.insertCell(1).textContent = t.description;
+                    row.insertCell(2).textContent = formatCurrency(t.amount);
+                } 
+
+                const actionCell = row.insertCell(t.type === 'omzet' ? 5 : 3); 
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Hapus';
+                deleteButton.className = 'delete-btn';
+                deleteButton.onclick = () => deleteTransaction(type, index, sortedTransactions);
+                actionCell.appendChild(deleteButton);
+            });
+        }
+
+        function searchTransactionsByType(type) {
+            let startDateInput, endDateInput;
+            let targetTableType = type;
+
+            if (type === 'omzet') {
+                startDateInput = document.getElementById('searchPendapatanStartDate');
+                endDateInput = document.getElementById('searchPendapatanEndDate');
+            } else if (type === 'pengeluaran') {
+                startDateInput = document.getElementById('searchPengeluaranStartDate');
+                endDateInput = document.getElementById('searchPengeluaranEndDate');
+            } 
+
+            const startDateStr = startDateInput.value;
+            const endDateStr = endDateInput.value;
+
+            if (!startDateStr || !endDateStr) {
+                alert('Silakan masukkan Tanggal Mulai dan Tanggal Akhir untuk pencarian.');
+                return;
+            }
+
+            const startDate = new Date(startDateStr);
+            const endDate = new Date(endDateStr);
+            endDate.setDate(endDate.getDate() + 1); // Tambah 1 hari agar mencakup seluruh hari akhir
+
+            const filtered = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return t.type === type && transactionDate >= startDate && transactionDate < endDate;
+            });
+            displayTransactionsByType(targetTableType, filtered);
+        }
+
+        // --- Fungsi Perhitungan Keuangan (Update dengan Filter Tanggal) ---
+        function calculateFinancials(useDateFilter = false) {
+            if (currentUserRole !== 'admin') return; 
+
+            let filteredTransactions = transactions;
+            let startDateStr, endDateStr;
+
+            if (useDateFilter) {
+                startDateStr = document.getElementById('summaryStartDate').value;
+                endDateStr = document.getElementById('summaryEndDate').value;
+
+                if (!startDateStr || !endDateStr) {
+                    alert('Silakan masukkan Tanggal Mulai dan Tanggal Akhir untuk mencari laporan.');
+                    return;
+                }
+
+                const startDate = new Date(startDateStr);
+                const endDate = new Date(endDateStr);
+                endDate.setDate(endDate.getDate() + 1); 
+
+                filteredTransactions = transactions.filter(t => {
+                    const transactionDate = new Date(t.date);
+                    return transactionDate >= startDate && transactionDate < endDate;
+                });
+            }
+
+            let totalLabaDihitung = 0; 
+            let totalPengeluaran = 0;
+
+            filteredTransactions.forEach(t => {
+                if (t.type === 'omzet') { 
+                    totalLabaDihitung += t.amount;
+                } else if (t.type === 'pengeluaran') {
+                    totalPengeluaran += t.amount;
+                }
+            });
+
+            const netProfit = totalLabaDihitung - totalPengeluaran;
+
+            document.getElementById('totalOmzetSummary').textContent = formatCurrency(totalLabaDihitung);
+            document.getElementById('totalPengeluaranSummary').textContent = formatCurrency(totalPengeluaran);
+            document.getElementById('netProfitSummary').textContent = formatCurrency(netProfit);
+
+            renderMonthlyChart(filteredTransactions); 
+        }
+
+        // --- Fungsi Rincian Laba ---
+        function updateLabaSummary() {
+            if (currentUserRole !== 'admin') return; 
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            lastDayOfMonth.setHours(23, 59, 59, 999); 
+
+            let labaHariIni = 0;
+            let labaBulanIni = 0;
+            let totalLabaKeseluruhan = 0;
+
+            transactions.filter(t => t.type === 'omzet').forEach(t => {
+                const transactionDate = new Date(t.date);
+                transactionDate.setHours(0, 0, 0, 0); 
+
+                totalLabaKeseluruhan += t.amount;
+
+                if (transactionDate.getTime() === today.getTime()) {
+                    labaHariIni += t.amount;
+                }
+
+                if (transactionDate >= firstDayOfMonth && transactionDate <= lastDayOfMonth) {
+                    labaBulanIni += t.amount;
+                }
+            });
+
+            document.getElementById('labaHariIni').textContent = formatCurrency(labaHariIni);
+            document.getElementById('labaBulanIni').textContent = formatCurrency(labaBulanIni);
+            document.getElementById('totalLabaKeseluruhan').textContent = formatCurrency(totalLabaKeseluruhan);
+        }
+
+        // --- Fungsi Rincian Pendapatan Kotor ---
+        function updatePendapatanKotorSummary() {
+            if (currentUserRole !== 'admin') return; 
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            lastDayOfMonth.setHours(23, 59, 59, 999); 
+
+            let pendapatanKotorHariIni = 0;
+            let pendapatanKotorBulanIni = 0;
+            let totalPendapatanKotorKeseluruhan = 0;
+
+            transactions.filter(t => t.type === 'omzet').forEach(t => {
+                const transactionDate = new Date(t.date);
+                transactionDate.setHours(0, 0, 0, 0); 
+
+                totalPendapatanKotorKeseluruhan += t.originalNominal; 
+
+                if (transactionDate.getTime() === today.getTime()) {
+                    pendapatanKotorHariIni += t.originalNominal;
+                }
+
+                if (transactionDate >= firstDayOfMonth && transactionDate <= lastDayOfMonth) {
+                    pendapatanKotorBulanIni += t.originalNominal;
+                }
+            });
+
+            document.getElementById('pendapatanKotorHariIni').textContent = formatCurrency(pendapatanKotorHariIni);
+            document.getElementById('pendapatanKotorBulanIni').textContent = formatCurrency(pendapatanKotorBulanIni);
+            document.getElementById('totalPendapatanKotorKeseluruhan').textContent = formatCurrency(totalPendapatanKotorKeseluruhan);
+        }
+
+
+        // --- Fungsi Rincian Pengeluaran ---
+        function updatePengeluaranSummary() {
+            if (currentUserRole !== 'admin') return; 
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            lastDayOfMonth.setHours(23, 59, 59, 999); 
+
+            let pengeluaranHariIni = 0;
+            let pengeluaranBulanIni = 0;
+            let totalPengeluaranKeseluruhan = 0;
+
+            transactions.filter(t => t.type === 'pengeluaran').forEach(t => {
+                const transactionDate = new Date(t.date);
+                transactionDate.setHours(0, 0, 0, 0); 
+
+                totalPengeluaranKeseluruhan += t.amount;
+
+                if (transactionDate.getTime() === today.getTime()) {
+                    pengeluaranHariIni += t.amount;
+                }
+
+                if (transactionDate >= firstDayOfMonth && transactionDate <= lastDayOfMonth) {
+                    pengeluaranBulanIni += t.amount;
+                }
+            });
+
+            document.getElementById('pengeluaranHariIni').textContent = formatCurrency(pengeluaranHariIni);
+            document.getElementById('pengeluaranBulanIni').textContent = formatCurrency(pengeluaranBulanIni);
+            document.getElementById('totalPengeluaranKeseluruhan').textContent = formatCurrency(totalPengeluaranKeseluruhan);
+        }
+
+        // --- Fungsi Update Ringkasan Harian di Sidebar ---
+        function updateSidebarDailySummary() {
+            // Fungsi ini akan selalu berjalan, tapi elemennya sendiri akan disembunyikan/ditampilkan
+            // berdasarkan peran pengguna di initializeUIForRole()
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let pendapatanKotorHarian = 0;
+            let labaHarian = 0;
+            let pengeluaranHarian = 0;
+
+            transactions.forEach(t => {
+                const transactionDate = new Date(t.date);
+                transactionDate.setHours(0, 0, 0, 0);
+
+                if (transactionDate.getTime() === today.getTime()) {
+                    if (t.type === 'omzet') {
+                        pendapatanKotorHarian += t.originalNominal;
+                        labaHarian += t.amount;
+                    } else if (t.type === 'pengeluaran') {
+                        pengeluaranHarian += t.amount;
+                    }
+                }
+            });
+
+            document.getElementById('sidebarPendapatanKotorHariIni').textContent = formatCurrency(pendapatanKotorHarian);
+            document.getElementById('sidebarLabaHariIni').textContent = formatCurrency(labaHarian);
+            document.getElementById('sidebarPengeluaranHariIni').textContent = formatCurrency(pengeluaranHarian);
+        }
+
+
+        // --- Fungsi Hitung Harga Jual ---
+        function saveSellingPriceHistory() {
+            // Simpan ke localStorage
+            localStorage.setItem('sellingPriceHistory', JSON.stringify(sellingPriceHistory));
+            
+            // Simpan ke Firebase jika user sudah login
+            if (userId) {
+                database.ref(`users/${userId}/sellingPriceHistory`).set(sellingPriceHistory)
+                    .catch(error => {
+                        console.error('Gagal menyimpan riwayat harga jual ke Firebase:', error);
+                    });
+            }
+        }
+
+        function addSellingPriceCalculation() {
+            if (currentUserRole !== 'admin') { 
+                alert('Anda tidak memiliki izin untuk menambahkan perhitungan harga jual.');
+                return;
+            }
+
+            const productName = document.getElementById('productName').value.trim();
+            const productCode = document.getElementById('productCode').value.trim();
+            const costPriceInput = document.getElementById('costPriceProduct').value;
+            const profitPercentageInput = document.getElementById('profitPercentage').value;
+            const taxPercentageInput = document.getElementById('taxPercentage').value;
+            const discountPercentageInput = document.getElementById('discountPercentage').value;
+
+            if (!costPriceInput) {
+                alert('Modal harus diisi!');
+                return;
+            }
+
+            let costPrice = parseFloat(costPriceInput);
+            // Auto-multiply by 1000 jika input kurang dari 1000 dan tanpa desimal, dan panjangnya <= 3 digit
+            if (costPriceInput.indexOf('.') === -1 && costPrice < 1000 && costPriceInput.length <= 3) {
+                costPrice *= 1000;
+            }
+
+            const profitPercentage = parseFloat(profitPercentageInput || '0') / 100;
+            const taxPercentage = parseFloat(taxPercentageInput || '0') / 100;
+            const discountPercentage = parseFloat(discountPercentageInput || '0') / 100;
+
+            if (isNaN(costPrice) || costPrice < 0 || 
+                isNaN(profitPercentage) || profitPercentage < 0 || profitPercentage > 1 ||
+                isNaN(taxPercentage) || taxPercentage < 0 || taxPercentage > 1 ||
+                isNaN(discountPercentage) || discountPercentage < 0 || discountPercentage > 1) {
+                alert('Input tidak valid. Pastikan Modal adalah angka positif, dan persentase antara 0-100.');
+                return;
+            }
+
+            if (productCode) {
+                const isDuplicate = sellingPriceHistory.some(item => item.productCode && item.productCode.toLowerCase() === productCode.toLowerCase());
+                if (isDuplicate) {
+                    alert('Kode Barang sudah ada. Mohon gunakan kode yang berbeda.');
+                    return;
+                }
+            }
+
+            let priceAfterProfit = costPrice * (1 + profitPercentage);
+            let taxAmount = priceAfterProfit * taxPercentage;
+            let discountAmount = priceAfterProfit * discountPercentage;
+            let finalSellingPriceBeforeRounding = priceAfterProfit - taxAmount - discountAmount;
+            let netProfitAmount = finalSellingPriceBeforeRounding - costPrice;
+
+            const calculatedSellingPrice = roundToThousands(finalSellingPriceBeforeRounding);
+            netProfitAmount = roundToThousands(netProfitAmount);
+
+            const newCalculation = {
+                productName: productName,
+                productCode: productCode,
+                costPrice: costPrice,
+                profitPercentage: parseFloat(profitPercentageInput || '0'), 
+                netProfitAmount: netProfitAmount, 
+                taxPercentage: parseFloat(taxPercentageInput || '0'),
+                discountPercentage: parseFloat(discountPercentageInput || '0'),
+                sellingPrice: calculatedSellingPrice
+            };
+
+            sellingPriceHistory.push(newCalculation);
+            saveSellingPriceHistory();
+            displaySellingPriceHistory();
+
+            document.getElementById('productName').value = '';
+            document.getElementById('productCode').value = '';
+            document.getElementById('costPriceProduct').value = '';
+            document.getElementById('taxPercentage').value = '0';
+            document.getElementById('discountPercentage').value = '0';
+        }
+
+        function displaySellingPriceHistory(filteredHistory = null) {
+            if (currentUserRole !== 'admin') return; 
+
+            const tableBody = document.querySelector('#sellingPriceTable tbody');
+            tableBody.innerHTML = '';
+
+            const displayList = filteredHistory || sellingPriceHistory;
+
+            if (displayList.length === 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 8;
+                cell.textContent = "Belum ada riwayat perhitungan harga jual.";
+                cell.style.textAlign = "center";
+                return;
+            }
+
+            displayList.forEach((item, index) => {
+                const row = tableBody.insertRow();
+                const cellProductName = row.insertCell(0);
+                const cellProductCode = row.insertCell(1);
+                const cellCostPrice = row.insertCell(2);
+                const cellNetProfit = row.insertCell(3); 
+                const cellTax = row.insertCell(4);
+                const cellDiscount = row.insertCell(5);
+                const cellSellingPrice = row.insertCell(6);
+                const cellActions = row.insertCell(7);
+
+                cellProductName.textContent = item.productName || '-';
+                cellProductCode.textContent = item.productCode || '-';
+                cellCostPrice.textContent = formatCurrency(item.costPrice);
+                
+                cellNetProfit.textContent = formatCurrency(item.netProfitAmount);
+                if (item.netProfitAmount >= 10000) {
+                    cellNetProfit.classList.add('profit-green');
+                } else {
+                    cellNetProfit.classList.add('profit-red');
+                }
+
+                cellTax.textContent = `${item.taxPercentage}%`;
+                cellDiscount.textContent = `${item.discountPercentage}%`;
+                cellSellingPrice.textContent = formatCurrency(item.sellingPrice);
+
+                const copyNameBtn = document.createElement('button');
+                copyNameBtn.textContent = 'Nama';
+                copyNameBtn.className = 'copy-btn';
+                copyNameBtn.onclick = () => copyToClipboard(item.productName || '', 'Nama Barang');
+                
+                const copyCodeBtn = document.createElement('button');
+                copyCodeBtn.textContent = 'Kode';
+                copyCodeBtn.className = 'copy-btn';
+                copyCodeBtn.onclick = () => copyToClipboard(item.productCode || '', 'Kode Barang');
+
+                const copyPriceBtn = document.createElement('button');
+                copyPriceBtn.textContent = 'Harga';
+                copyPriceBtn.className = 'copy-btn';
+                copyPriceBtn.onclick = () => copyToClipboard(item.sellingPrice, 'Harga Jual');
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Hapus';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = () => deleteSellingPriceCalculation(index);
+
+                cellActions.appendChild(copyNameBtn);
+                cellActions.appendChild(copyCodeBtn);
+                cellActions.appendChild(copyPriceBtn);
+                cellActions.appendChild(deleteBtn);
+            });
+        }
+
+        function searchSellingPriceHistory() {
+            if (currentUserRole !== 'admin') return; 
+
+            const searchTerm = document.getElementById('searchPriceTerm').value.toLowerCase().trim();
+            if (!searchTerm) {
+                displaySellingPriceHistory(); 
+                return;
+            }
+
+            const filtered = sellingPriceHistory.filter(item => 
+                (item.productName && item.productName.toLowerCase().includes(searchTerm)) ||
+                (item.productCode && item.productCode.toLowerCase().includes(searchTerm))
+            );
+            displaySellingPriceHistory(filtered);
+        }
+
+        function deleteSellingPriceCalculation(index) {
+            const enteredPassword = prompt('Masukkan kata sandi untuk menghapus:');
+            if (enteredPassword !== MASTER_PASSWORD) { 
+                alert('Kata sandi salah. Penghapusan dibatalkan.');
+                return;
+            }
+            
+            if (confirm('Apakah Anda yakin ingin menghapus perhitungan ini?')) {
+                // Mendapatkan item yang akan dihapus dari daftar yang sedang ditampilkan
+                const currentDisplayList = document.querySelector('#sellingPriceTable tbody').children;
+                if (!currentDisplayList[index]) {
+                    alert("Item tidak ditemukan pada daftar yang ditampilkan.");
+                    return;
+                }
+                const productNameToDelete = currentDisplayList[index].cells[0].textContent;
+                const productCodeToDelete = currentDisplayList[index].cells[1].textContent;
+                
+                // Cari indeks asli di `sellingPriceHistory`
+                const originalIndex = sellingPriceHistory.findIndex(item => 
+                    item.productName === productNameToDelete && item.productCode === productCodeToDelete
+                );
+
+                if (originalIndex > -1) {
+                    sellingPriceHistory.splice(originalIndex, 1);
+                    saveSellingPriceHistory();
+                    displaySellingPriceHistory(); 
+                    alert('Data berhasil dihapus!');
+                } else {
+                    alert("Gagal menghapus item. Item tidak ditemukan dalam riwayat.");
+                }
+            }
+        }
+
+
+        // --- FUNGSI CHART.JS ---
+        function renderMonthlyChart(dataToChart = transactions) {
+            if (currentUserRole !== 'admin') return; 
+
+            const monthlyData = {}; 
+
+            dataToChart.forEach(t => {
+                const date = new Date(t.date);
+                const yearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+
+                if (!monthlyData[yearMonth]) {
+                    monthlyData[yearMonth] = { grossIncome: 0, profit: 0, expense: 0 };
+                }
+
+                if (t.type === 'omzet') {
+                    monthlyData[yearMonth].grossIncome += t.originalNominal;
+                    monthlyData[yearMonth].profit += t.amount;
+                } else if (t.type === 'pengeluaran') {
+                    monthlyData[yearMonth].expense += t.amount;
+                }
+            });
+
+            const sortedMonths = Object.keys(monthlyData).sort();
+
+            const labels = sortedMonths.map(month => {
+                const [year, mon] = month.split('-');
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+                return `${monthNames[parseInt(mon) - 1]} ${year}`;
+            });
+
+            const grossIncomeData = sortedMonths.map(month => monthlyData[month].grossIncome);
+            const profitData = sortedMonths.map(month => monthlyData[month].profit);
+            const expenseData = sortedMonths.map(month => monthlyData[month].expense);
+
+            const ctx = document.getElementById('monthlyFinancialChart').getContext('2d');
+
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+
+            // Dapatkan warna berdasarkan mode tema saat ini
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const grossIncomeColor = isDarkMode ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.7)'; 
+            const profitColor = isDarkMode ? 'rgba(76, 175, 80, 0.9)' : 'rgba(40, 167, 69, 0.7)'; 
+            const expenseColor = isDarkMode ? 'rgba(255, 99, 71, 0.9)' : 'rgba(220, 53, 69, 0.7)'; 
+
+            const textColor = isDarkMode ? '#e0e0e0' : '#333'; 
+            const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; 
+
+            monthlyChart = new Chart(ctx, {
+                type: 'bar', 
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Pendapatan Kotor',
+                            data: grossIncomeData,
+                            backgroundColor: grossIncomeColor, 
+                            borderColor: grossIncomeColor.replace('0.7', '1'),
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Laba Dihitung',
+                            data: profitData,
+                            backgroundColor: profitColor, 
+                            borderColor: profitColor.replace('0.7', '1'),
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Pengeluaran',
+                            data: expenseData,
+                            backgroundColor: expenseColor, 
+                            borderColor: expenseColor.replace('0.7', '1'),
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, 
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah (Rp)',
+                                color: textColor 
+                            },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return formatCurrency(value); 
+                                },
+                                color: textColor 
+                            },
+                            grid: {
+                                color: gridColor 
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Bulan',
+                                color: textColor 
+                            },
+                            ticks: {
+                                color: textColor 
+                            },
+                            grid: {
+                                color: gridColor 
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: textColor 
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += formatCurrency(context.parsed.y); 
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Performa Keuangan Bulanan',
+                            color: textColor, 
+                            font: {
+                                size: 18
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Fungsi Inisialisasi Aplikasi Setelah Login ---
+        function initializeApp() {
+            // Coba muat data dari Firebase terlebih dahulu jika user sudah login
+            if (userId) {
+                // Muat transaksi dari Firebase
+                database.ref(`users/${userId}/transactions`).once('value')
+                    .then((snapshot) => {
+                        const data = snapshot.val();
+                        if (data) {
+                            transactions = data.map(t => ({
+                                ...t,
+                                date: new Date(t.date)
+                            }));
+                        }
+                        
+                        // Muat riwayat harga jual dari Firebase
+                        return database.ref(`users/${userId}/sellingPriceHistory`).once('value');
+                    })
+                    .then((snapshot) => {
+                        const data = snapshot.val();
+                        if (data) {
+                            sellingPriceHistory = data;
+                        }
+                        
+                        // Setel nilai default setelah data dimuat
+                        setDefaultValues();
+                        
+                        // Update UI dengan data yang sudah dimuat
+                        updateUIAfterDataLoad();
+                    })
+                    .catch((error) => {
+                        console.error('Gagal memuat data dari Firebase:', error);
+                        // Jika gagal, coba muat dari localStorage
+                        loadFromLocalStorage();
+                    });
+            } else {
+                // Jika tidak ada user login, muat dari localStorage
+                loadFromLocalStorage();
+            }
+        }
+        
+        function loadFromLocalStorage() {
+            const savedTransactions = localStorage.getItem('transactions');
+            if (savedTransactions) {
+                transactions = JSON.parse(savedTransactions).map(t => ({
+                    ...t,
+                    date: new Date(t.date)
+                }));
+            }
+
+            const savedSellingPriceHistory = localStorage.getItem('sellingPriceHistory');
+            if (savedSellingPriceHistory) {
+                sellingPriceHistory = JSON.parse(savedSellingPriceHistory);
+            }
+            
+            setDefaultValues();
+            updateUIAfterDataLoad();
+        }
+        
+        function setDefaultValues() {
+            document.getElementById('profitPercentage').value = '20'; 
+            document.getElementById('taxPercentage').value = '0';
+            document.getElementById('discountPercentage').value = '0';
+            document.getElementById('profitPercentageLaba').value = '20'; 
+        }
+        
+        function updateUIAfterDataLoad() {
+            // Tambahkan event listener untuk navigasi
+            // PENTING: Gunakan event delegation pada parent (ul#mainMenu)
+            document.getElementById('mainMenu').addEventListener('click', function(e) {
+                // Pastikan yang diklik adalah link <a> di dalam <li> dengan kelas nav-link
+                if (e.target.tagName === 'A' && e.target.classList.contains('nav-link')) {
+                    e.preventDefault();
+                    const pageId = e.target.dataset.page;
+                    
+                    // Pengecekan akses yang lebih ketat
+                    if (currentUserRole === 'admin') {
+                        showPage(pageId); // Admin bisa ke semua halaman
+                    } else if (currentUserRole === 'cashier') {
+                        // Kasir hanya bisa ke 'pendapatan' atau 'pengeluaran'
+                        if (pageId === 'pendapatan' || pageId === 'pengeluaran') {
+                            showPage(pageId);
+                        } else {
+                            alert('Anda tidak memiliki akses ke menu ini.');
+                        }
+                    } else {
+                        alert('Anda belum login atau peran tidak dikenal.');
+                    }
+                }
+            });
+
+            // Tambahkan event listener untuk input Enter pada form
+            const priceInputs = document.querySelectorAll('#harga-jual input');
+            priceInputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); 
+                        addSellingPriceCalculation();
+                    }
+                });
+            });
+
+            const profitCalcInputs = document.querySelectorAll('#pendapatan input:not([type="date"])'); 
+            profitCalcInputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); 
+                        calculateProfitAndAddTransaction();
+                    }
+                });
+            });
+
+            const expenseInputs = document.querySelectorAll('#pengeluaran input:not([type="date"])');
+            expenseInputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); 
+                        addTransaction('pengeluaran');
+                    }
+                });
+            });
+
+            updateSidebarDailySummary(); 
+            if (currentUserRole === 'admin') { 
+                renderMonthlyChart(); 
+                calculateFinancials(); 
+            }
+            
+            // Panggil showPage() untuk menampilkan halaman default setelah semua setup selesai
+            if (currentUserRole === 'admin' || currentUserRole === 'cashier') {
+                showPage('pendapatan');
+            }
+        }
+
+        // --- Inisialisasi Saat Halaman Dimuat ---
+        document.addEventListener('DOMContentLoaded', (event) => {
+            loadTheme(); 
+
+            // Tampilkan overlay login saat halaman dimuat
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('passwordInput').focus(); 
+            document.body.style.overflow = 'hidden'; 
+
+            // Event listener untuk tombol Enter di input password
+            document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkPassword();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
